@@ -2,4 +2,4 @@ export { default as getIntNodeVersion } from "./getIntNodeVersion";
 export { default as isChromeInstalled } from "./isChromeInstalled";
 export { default as getDefaultBrowser } from "./getDefaultBrowser";
 export { default as IsGitPersistent } from "./IsGitPersistent";
-export * from "./recommendedPackages";
+export { default as isPkgInstalled } from "./isPkgInstalled";

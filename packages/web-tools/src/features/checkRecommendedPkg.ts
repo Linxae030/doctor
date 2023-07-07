@@ -1,26 +1,27 @@
+import type { IApi } from "../type";
 import { DoctorLevel } from "@doctors/core";
-import { IApi } from "../type";
 import {
   ValidateReturnValue,
   VerifiableItem,
   chalkByDoctorLevel,
-  isNrmInstalled,
+  isPkgInstalled,
 } from "@doctors/utils";
 import { CORRECT_ICON, ERROR_ICON } from "../constants";
-const RecommendPackages: VerifiableItem[] = [
+
+const recommendPackages: VerifiableItem[] = [
   {
     pkgName: "nrm",
-    validateFn: isNrmInstalled,
+    versionCommand: "nrm -V",
   },
 ];
 
 /** 按安装状态排序 */
-const sortValidateRes = (validateRes: ValidateReturnValue[]) => {
+function sortValidateRes(validateRes: ValidateReturnValue[]) {
   return validateRes.sort((a, b) => {
     if (a.isInstalled && !b.isInstalled) return -1;
     else return 0;
   });
-};
+}
 
 // 生成描述信息
 function generateDescription(validateRes, doctorLevel) {
@@ -33,7 +34,14 @@ function generateDescription(validateRes, doctorLevel) {
         item.pkgName
       }' is installed ${chalkByDoctorLevel(
         DoctorLevel.SUCCESS,
-        `Now: v${item.msg}`
+        `Now: v${item.currentVersion} ${
+          item.latestVersion === item.currentVersion
+            ? chalkByDoctorLevel(DoctorLevel.SUCCESS, "Is up to date!")
+            : chalkByDoctorLevel(
+                DoctorLevel.WARN,
+                `Latest: v${item.latestVersion}`
+              )
+        }`
       )}\n`;
     } else if (doctorLevel === DoctorLevel.WARN) {
       description += ` ${ERROR_ICON} '${item.pkgName}' is not installed.\n`;
@@ -69,7 +77,9 @@ export default (api: IApi) => {
     if (ruleLevel === DoctorLevel.OFF) return;
 
     const validateRes = await Promise.allSettled(
-      RecommendPackages.map((item) => item.validateFn?.(item.pkgName))
+      recommendPackages.map((item) =>
+        isPkgInstalled(item.pkgName, item.versionCommand)
+      )
     );
 
     const formattedRes = validateRes.map(
@@ -79,7 +89,7 @@ export default (api: IApi) => {
     const { doctorLevel, description } = handleValidateRes(formattedRes);
 
     return {
-      label: "Recommend Package",
+      label: "Recommend Packages",
       description,
       doctorLevel,
     };

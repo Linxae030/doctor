@@ -2,12 +2,23 @@ import { globSync } from "glob";
 import path from "path";
 import fs from "fs";
 import lodash from "lodash";
+import { logger } from "@umijs/utils";
 import sourceParser from "./features/scanningParser";
 import { DEFAULT_SOURCE_IGNORES } from "./constants";
 import { SourceFile } from "./types";
+import { execCommand } from "./exec";
 
 export function getPkgNameFromPath(p: string) {
   return p.match(/^(?:@[a-z\d][\w-.]*\/)?[a-z\d][\w-.]*/i)?.[0];
+}
+
+export async function getPkgLatestVersionByName(pkgName: string) {
+  try {
+    const latestVersion = await execCommand(`npm view ${pkgName} version`);
+    return latestVersion;
+  } catch (err) {
+    logger.error(err);
+  }
 }
 
 //----------------------------- Source ---------------------------------

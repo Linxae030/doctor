@@ -1,7 +1,11 @@
 import { type IDoctorSourceParseResult } from "../features/scanningParser";
 
-export type ValidateFn = (pkgName: string) => Awaitable<ValidateReturnValue>;
 export type Awaitable<T> = T | Promise<T>;
+
+export type ValidateFn = (
+  pkgName: string,
+  versionCommand: string
+) => Awaitable<ValidateReturnValue>;
 
 export interface SourceFile {
   path?: string;
@@ -14,11 +18,15 @@ export interface ValidateReturnValue {
   isInstalled: boolean;
   /** 包名 */
   pkgName: string;
-  /** 附带信息 */
-  msg: string;
+  /** 当前版本 */
+  currentVersion?: string;
+  /** 最新版本 */
+  latestVersion?: string;
 }
 
 export interface VerifiableItem {
+  /** 包名 */
   pkgName: string;
-  validateFn: ValidateFn;
+  /** 获取版本指令 */
+  versionCommand: string;
 }
